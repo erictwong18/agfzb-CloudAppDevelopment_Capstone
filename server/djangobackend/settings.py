@@ -27,7 +27,7 @@ DEBUG = True
 
 APPEND_SLASH = True
 
-ALLOWED_HOSTS = ["localhost"]
+ALLOWED_HOSTS = ["localhost", "cardealership-insightful-oribi-ge.mybluemix.net", "cardealership-nginx-quiet-bear-cc.mybluemix.net"]
 
 
 # Application definition

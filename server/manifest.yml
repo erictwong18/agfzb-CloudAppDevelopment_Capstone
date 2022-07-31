@@ -1,11 +1,9 @@
   applications:
-  - name: djangoapp
-    routes:
-      - route: $HOST.$DOMAIN
+  - name: cardealership
+    random-route: True
     memory: 128M
     buildpack: python_buildpack
-  - name: djangoapp-nginx
-    routes:
-      - route: $HOST.$DOMAIN/static
+  - name: cardealership-nginx
+    random-route: True
     memory: 128M
     buildpack: staticfile_buildpack

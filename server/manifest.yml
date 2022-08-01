@@ -1,3 +1,7 @@
+    language: python
+    default_versions:
+    - name: python
+      version: 3.6.4
   applications:
   - name: cardealership
     routes:

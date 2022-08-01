@@ -42,7 +42,7 @@ def login_request(request):
         user = authenticate(username=username, password=password)
         if user is not None:
             # If user is valid, return to home page
-            login(request, user)
+            login(request, user = user)
             return redirect('djangoapp:index')
         else:
             # If not, return to login page again
@@ -66,7 +66,7 @@ def registration_request(request):
 # ...
     context = {}
     if request.method == 'GET':
-        return render(request, 'onlinecourse/user_registration.html', context)
+        return render(request, 'djangoapp/registration.html', context)
     elif request.method == 'POST':
         username = request.POST['username']
         password = request.POST['psw']

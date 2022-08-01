@@ -1,9 +1,11 @@
   applications:
   - name: cardealership
-    route: cardealership-insightful-oribi-ge.mybluemix.net
+    routes:
+      - route: cardealership-insightful-oribi-ge.mybluemix.net
     memory: 128M
     buildpack: python_buildpack
   - name: cardealership-nginx
-    route: cardealership-nginx-quiet-bear-cc.mybluemix.net
+    routes:
+      - route: cardealership-nginx-quiet-bear-cc.mybluemix.net
     memory: 128M
     buildpack: staticfile_buildpack

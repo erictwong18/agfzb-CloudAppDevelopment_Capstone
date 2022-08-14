@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
-from .restapis import get_dealers_from_cf
+from .restapis import get_dealers_from_cf, get_dealers_by_id
 import logging
 import json
 
@@ -105,7 +105,60 @@ def get_dealerships(request):
 # def get_dealer_details(request, dealer_id):
 # ...
 
+def get_dealer_details(request, id):
+    if request.method == "GET":
+        context = {}
+        dealer_url = "https://788e45ee.us-south.apigw.appdomain.cloud/api/dealerships"
+        dealer = get_dealer_by_id_from_cf(dealer_url, id=id)
+        context["dealer"] = dealer
+    
+        review_url = "https://788e45ee.us-south.apigw.appdomain.cloud/api/reviews"
+        reviews = get_dealer_reviews_from_cf(review_url, id=id)
+        print(reviews)
+        context["reviews"] = reviews
+        
+        return render(request, 'djangoapp/dealer_details.html', context)
+
 # Create a `add_review` view to submit a review
 # def add_review(request, dealer_id):
 # ...
+def add_review(request, id):
+    context = {}
+    dealer_url = "https://788e45ee.us-south.apigw.appdomain.cloud/api/dealerships"
+    dealer = get_dealers_by_id(dealer_url, id=id)
+    context["dealer"] = dealer
+    if request.method == 'GET':
+        cars = CarModel.objects.all()
+        print(cars)
+        context["cars"] = cars
+    if request.method == "POST":
+            form = request.POST
+            review = dict()
+            review["name"] = f"{request.user.first_name} {request.user.last_name}"
+            review["dealership"] = id
+            review["review"] = form["content"]
+            review["purchase"] = form.get("purchasecheck")
+            if review["purchase"]:
+                review["purchase_date"] = datetime.strptime(form.get("purchasedate"), "%m/%d/%Y").isoformat()
+            car = CarModel.objects.get(pk=form["car"])
+            review["car_make"] = car.make
+            review["car_model"] = car.name
+            review["car_year"] = car.year
+            review["time"] = datetime.utcnow().isoformat()
+           
+            if form.get("purchasecheck"):
+                review["purchase_date"] = datetime.strptime(form.get("purchasedate"), "%m/%d/%Y").isoformat()
+            else: 
+                review["purchase_date"] = None
 
+            url = "https://36cef25d.eu-gb.apigw.appdomain.cloud/api/post-review"
+            json_payload = {"review": review} 
+            result = post_request(url, json_payload, id=id)
+            if int(result.status_code) == 200:
+                print("Review posted successfully.")
+            
+            return redirect("djangoapp:dealer_details",id=id)
+
+    else:
+        print("login fail.")
+        return redirect("/djangoapp/login")

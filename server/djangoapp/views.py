@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
-from .restapis import get_dealers_from_cf, get_dealers_by_id
+from .restapis import get_dealers_from_cf, get_dealers_by_id, get_dealer_reviews_from_cf
 import logging
 import json
 
@@ -111,7 +111,7 @@ def get_dealer_details(request, id):
     if request.method == "GET":
         context = {}
         dealer_url = "https://788e45ee.us-south.apigw.appdomain.cloud/api/dealerships"
-        dealer = get_dealer_by_id_from_cf(dealer_url, id=id)
+        dealer = get_dealers_by_id(dealer_url, id)
         context["dealer"] = dealer
     
         review_url = "https://788e45ee.us-south.apigw.appdomain.cloud/api/reviews"

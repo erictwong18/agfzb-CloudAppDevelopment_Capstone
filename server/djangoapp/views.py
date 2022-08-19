@@ -8,6 +8,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
 from .restapis import get_dealers_from_cf, get_dealers_by_id, get_dealer_reviews_from_cf
+from .models import CarModel, CarMake
 import logging
 import json
 
@@ -112,12 +113,15 @@ def get_dealer_details(request, id):
         context = {}
         dealer_url = "https://788e45ee.us-south.apigw.appdomain.cloud/api/dealerships"
         dealer = get_dealers_by_id(dealer_url, id)
+        print(dealer)
+        print(type(dealer))
         context["dealer"] = dealer
     
         review_url = "https://788e45ee.us-south.apigw.appdomain.cloud/api/reviews"
         reviews = get_dealer_reviews_from_cf(review_url, id=id)
         print(reviews)
         context["reviews"] = reviews
+        context["id"] = id
         
         return render(request, 'djangoapp/dealer_details.html', context)
 
@@ -127,40 +131,44 @@ def get_dealer_details(request, id):
 def add_review(request, id):
     context = {}
     dealer_url = "https://788e45ee.us-south.apigw.appdomain.cloud/api/dealerships"
-    dealer = get_dealers_by_id(dealer_url, id=id)
+    dealer = get_dealers_by_id(dealer_url, dealerID=id)
     context["dealer"] = dealer
-    if request.method == 'GET':
-        cars = CarModel.objects.all()
-        print(cars)
-        context["cars"] = cars
-    if request.method == "POST":
-            form = request.POST
-            review = dict()
-            review["name"] = f"{request.user.first_name} {request.user.last_name}"
-            review["dealership"] = id
-            review["review"] = form["content"]
-            review["purchase"] = form.get("purchasecheck")
-            if review["purchase"]:
-                review["purchase_date"] = datetime.strptime(form.get("purchasedate"), "%m/%d/%Y").isoformat()
-            car = CarModel.objects.get(pk=form["car"])
-            review["car_make"] = car.make
-            review["car_model"] = car.name
-            review["car_year"] = car.year
-            review["time"] = datetime.utcnow().isoformat()
-           
-            if form.get("purchasecheck"):
-                review["purchase_date"] = datetime.strptime(form.get("purchasedate"), "%m/%d/%Y").isoformat()
-            else: 
-                review["purchase_date"] = None
+    print(request.method)
+    
+    #if request.method == 'GET':
+    cars = CarModel.objects.all()
+    print(cars)
+    context["cars"] = cars
+    #if request.method == "POST":
+    form = request.POST
+    print(form)
+    review = dict()
+    review["name"] = f"{request.user.first_name} {request.user.last_name}"
+    review["dealership"] = id
+    review["review"] = form.get("content")
+    review["purchase"] = form.get("purchasecheck")
+    if review["purchase"]:
+        review["purchase_date"] = datetime.strptime(form.get("purchasedate"), "%m/%d/%Y").isoformat()
+    car = CarModel.objects.get(id = 1)
+    review["car_make"] = car.make
+    review["car_model"] = car.name
+    review["car_year"] = car.year
+    review["time"] = datetime.utcnow().isoformat()
+    
+    if form.get("purchasecheck"):
+        review["purchase_date"] = datetime.strptime(form.get("purchasedate"), "%m/%d/%Y").isoformat()
+    else: 
+        review["purchase_date"] = None
 
-            url = "https://36cef25d.eu-gb.apigw.appdomain.cloud/api/post-review"
-            json_payload = {"review": review} 
-            result = post_request(url, json_payload, id=id)
-            if int(result.status_code) == 200:
-                print("Review posted successfully.")
-            
-            return redirect("djangoapp:dealer_details",id=id)
+    url = "https://36cef25d.eu-gb.apigw.appdomain.cloud/api/post-review"
+    json_payload = {"review": review} 
+    result = post_request(url, json_payload, id=id)
+    if int(result.status_code) == 200:
+        print("Review posted successfully.")
+    
+    return redirect("djangoapp:dealer_details",id=id)
 
-    else:
-        print("login fail.")
-        return redirect("/djangoapp/login")
+    #else:
+    #    print("login fail.")
+    #    return redirect("/djangoapp/login")
+    

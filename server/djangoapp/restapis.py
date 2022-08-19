@@ -93,7 +93,7 @@ def get_dealers_by_id(url, dealerID = id):
                                    short_name=dealer_doc["short_name"],
                                    st=dealer_doc["st"], zip=dealer_doc["zip"])
             results.append(dealer_obj)
-
+    print(results)
     return results
 
 def get_dealers_by_state(url, state):
